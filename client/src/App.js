@@ -1,9 +1,9 @@
 import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { Container } from '@mui/material';
-import SignIn from './components/SignIn';
-import TaskList from './components/TaskList';
-import TaskDetails from './components/TaskDetails';
+import SignIn from './pages/SignIn';
+import TaskList from './pages/TaskList';
+import TaskDetails from './pages/TaskDetails';
 
 export default function App() {
   return (
