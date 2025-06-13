@@ -13,7 +13,7 @@ export default function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSignIn = () =>
-    history.push('/tasks');
+    history.push('/home');
 
   return (
     <LoginContainer>

@@ -26,7 +26,7 @@ export default function TaskDetails() {
         <Typography><strong>Owner:</strong> {task.owner}</Typography>
         <Typography><strong>Description:</strong> {task.description}</Typography>
       </Box>
-      <Button component={Link} to="/tasks" variant="contained">
+      <Button component={Link} to="/home" variant="contained">
         Back to List
       </Button>
     </Paper>
