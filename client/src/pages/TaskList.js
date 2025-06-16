@@ -1,20 +1,24 @@
-import React from 'react';
 import { Paper, Typography, Box } from '@mui/material';
 import TaskCard from '../components/Tasks/TaskCard';
+import AddTask from '../components/Tasks/AddTask';
 
 const tasks = [
-  { id: '1', name: 'Task 1', dateCreated: '2025-06-01', status: 'Pending', employeeIds: ['m1','m2','m3'] },
+  { id: '1', name: 'Task 1', dateCreated: '2025-06-01', status: 'In Review', employeeIds: ['m1','m2','m3'] },
   { id: '2', name: 'Task 2', dateCreated: '2025-06-02', status: 'Completed', employeeIds: ['m1','m2','m3','m1','m2','m3'] },
   { id: '3', name: 'Task 3', dateCreated: '2025-06-03', status: 'In Progress', employeeIds: ['m1','m2'] },
+  { id: '4', name: 'Task 4', dateCreated: '2025-06-04', status: 'Not Started', employeeIds: ['m1','m2'] },
 ];
 
 export default function TaskList() {
+  const sortedTasks = [...tasks].sort(
+    (a, b) => new Date(b.dateCreated) - new Date(a.dateCreated)
+  );
   return (
     <Paper elevation={0} sx={{ p: 2, width: '95%', mx:'auto' }}>
       <Typography
-        variant="h6"
+        variant="h4"
         gutterBottom
-        sx={{ fontWeight: 'bold', pl:1, mb: 2 }}
+        sx={{ pl:1, mb: 2 }}
       >
         Task Board
       </Typography>
@@ -35,10 +39,11 @@ export default function TaskList() {
       <Box />
       </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {tasks.map(task => (
-            <TaskCard key={task.id} task={task} />
-          ))}
-        </Box>
+        <AddTask />
+        {sortedTasks.map(task => (
+          <TaskCard key={task.id} task={task} />
+        ))}
+      </Box>
     </Paper>
   );
 }

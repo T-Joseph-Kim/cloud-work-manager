@@ -16,12 +16,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Link } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 
-// dummy member data
 const membersData = {
   m1: { firstName: 'John', lastName: 'Doe', dob: '1990-01-01' },
   m2: { firstName: 'Jane', lastName: 'Smith', dob: '1985-05-15' },
   m3: { firstName: 'Bob', lastName: 'Johnson', dob: '1978-09-22' },
-  // add more as needed
 };
 
 function getOrdinal(day) {
@@ -35,17 +33,20 @@ function getOrdinal(day) {
 }
 
 function formatDate(dateString) {
-  const date = new Date(dateString);
-  const month = date.toLocaleString('en-US', { month: 'long' });
-  const day = date.getDate();
-  const year = date.getFullYear();
-  return `${month} ${day}${getOrdinal(day)}, ${year}`;
+  const [year, month, day] = dateString.split('-').map(Number);
+  
+  const date = new Date(year, month - 1, day);
+  
+  const monthName = date.toLocaleString('en-US', { month: 'long' });
+  const ordinal    = getOrdinal(day);
+  return `${monthName} ${day}${ordinal}, ${year}`;
 }
 
 const statusColors = {
-  Completed: '#4caf50',
-  Pending:   '#ff9800',
-  'In Progress': '#2196f3'
+    Completed:    '#4caf50',
+    'In Review':  '#ff9800',
+    'Not Started':'#f44336',
+    'In Progress':'#2196f3'
 };
 
 export default function TaskCard({ task }) {
