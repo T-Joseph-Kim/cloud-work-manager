@@ -1,41 +1,45 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Table, TableHead, TableRow, TableCell, TableBody, Button, Typography, Paper } from '@mui/material';
+import { Paper, Typography, Box } from '@mui/material';
+import TaskCard from '../components/Tasks/TaskCard';
 
 const tasks = [
-  { id: '1', name: 'Task 1', dateCreated: '2025-06-01', status: 'Pending' },
-  { id: '2', name: 'Task 2', dateCreated: '2025-06-02', status: 'Completed' },
-  { id: '3', name: 'Task 3', dateCreated: '2025-06-03', status: 'In Progress' },
+  { id: '1', name: 'Task 1', dateCreated: '2025-06-01', status: 'Pending', employeeIds: ['m1','m2','m3'] },
+  { id: '2', name: 'Task 2', dateCreated: '2025-06-02', status: 'Completed', employeeIds: ['m1','m2','m3','m1','m2','m3'] },
+  { id: '3', name: 'Task 3', dateCreated: '2025-06-03', status: 'In Progress', employeeIds: ['m1','m2'] },
 ];
 
 export default function TaskList() {
   return (
-    <Paper style={{ padding: 16 }}>
-      <Typography variant="h6" gutterBottom>Task List</Typography>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Date Created</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {tasks.map(task => (
-            <TableRow key={task.id}>
-              <TableCell>{task.name}</TableCell>
-              <TableCell>{task.dateCreated}</TableCell>
-              <TableCell>{task.status}</TableCell>
-              <TableCell>
-                <Button component={Link} to={`/tasks/${task.id}`} size="small">
-                  View Details
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <Paper elevation={0} sx={{ p: 2 }}>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ fontWeight: 'bold', pl:1, mb: 2 }}
+      >
+        Task Board
+      </Typography>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1.5fr 1fr 2fr auto',
+          alignItems: 'center',
+          gap: 2,
+          mb: 1,
+          px: 1
+        }}
+      >
+        <Typography variant="subtitle2">Task Name</Typography>
+        <Typography variant="subtitle2">Date Created</Typography>
+        <Typography variant="subtitle2">Status</Typography>
+        <Typography variant="subtitle2">Assignees</Typography>
+        <Box /> {/* spacer for edit icon column */}
+      </Box>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {tasks.map(task => (
+          <TaskCard key={task.id} task={task} />
+        ))}
+      </Box>
     </Paper>
   );
 }

@@ -4,9 +4,12 @@ import {
   Avatar,
   Typography,
   TextField,
-  Paper
+  Paper,
+  IconButton
 } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { Link } from 'react-router-dom';
 
 export default function Profile() {
   const [profile, setProfile] = useState({
@@ -20,19 +23,40 @@ export default function Profile() {
     setProfile({ ...profile, [e.target.name]: e.target.value });
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{
+    position: 'fixed',
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #90caf9 0%, #e3f2fd 100%)'
+  }}>
       <Paper
         elevation={2}
         sx={{
+          position: 'relative',
           p: 4,
-          maxWidth: 800,
+          width: '80%',
+          maxWidth: '1200px',
           mx: 'auto',
-          borderRadius: 2,
+          borderRadius: 6,
+          minHeight: '60vh',
         }}
       >
+        <IconButton
+            component={Link}
+            to="/home"
+            sx={{
+            position: 'absolute',
+            top: 20,
+            left: 20,
+            }}
+        >
+            <ArrowBackIosIcon/>
+        </IconButton>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Avatar sx={{ width: 100, height: 100, bgcolor: 'primary.light' }}>
-            <AccountCircleIcon sx={{ fontSize: 80, color: 'primary.main' }} />
+          <Avatar sx={{ width: 250, height: 250, bgcolor: 'primary.light' }}>
+            <AccountCircleIcon sx={{ fontSize: 240, color: 'primary.main' }} />
           </Avatar>
 
           <Box
@@ -41,7 +65,7 @@ export default function Profile() {
               flexGrow: 1,
               display: 'flex',
               flexDirection: 'column',
-              gap: 3,
+              gap: 6,
             }}
             noValidate
           >
