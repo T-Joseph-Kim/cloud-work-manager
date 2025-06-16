@@ -32,7 +32,7 @@ export default function TaskList() {
         <Typography variant="subtitle2">Date Created</Typography>
         <Typography variant="subtitle2">Status</Typography>
         <Typography variant="subtitle2">Assignees</Typography>
-        <Box /> {/* spacer for edit icon column */}
+        <Box />
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
