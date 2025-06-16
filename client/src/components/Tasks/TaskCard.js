@@ -68,18 +68,22 @@ export default function TaskCard({ task }) {
           gridTemplateColumns: '2fr 1.5fr 0.80fr 2fr auto',
           alignItems: 'center',
           p: 2,
-          gap: 2
+          gap: 2,
+          borderRadius: 4,
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+          boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0px 8px 24px rgba(0,0,0,0.15)',
+          }
         }}
       >
-        {/* Task Name */}
         <Typography variant="body1">{task.name}</Typography>
 
-        {/* Date Created */}
         <Typography variant="body2" color="text.secondary">
           {formatDate(task.dateCreated)}
         </Typography>
 
-        {/* Status Badge */}
         <Chip
           label={task.status}
           sx={{
@@ -89,7 +93,6 @@ export default function TaskCard({ task }) {
           }}
         />
 
-        {/* Avatars */}
         <Box sx={{ display: 'flex', alignItems: 'center', pl:4 }}>
           {task.employeeIds.slice(0, 2).map((id, idx) => (
             <Tooltip key={id} title="See Employee" arrow>
@@ -132,7 +135,6 @@ export default function TaskCard({ task }) {
           )}
         </Box>
 
-        {/* Edit Icon */}
         <Tooltip title="Edit Task" arrow>
           <IconButton
             component={Link}
@@ -151,7 +153,6 @@ export default function TaskCard({ task }) {
         </Tooltip>
       </Card>
 
-      {/* Member Detail Dialog */}
       <Dialog open={detailOpen} onClose={closeDetail}>
         <DialogTitle sx={{ position: 'relative', pr: 6 }}>
           Member Details
@@ -174,7 +175,6 @@ export default function TaskCard({ task }) {
         </DialogContent>
       </Dialog>
 
-      {/* Employee List Dialog */}
       <Dialog open={listOpen} onClose={() => setListOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>
           Assigned Employees

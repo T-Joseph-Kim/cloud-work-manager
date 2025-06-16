@@ -10,7 +10,7 @@ const tasks = [
 
 export default function TaskList() {
   return (
-    <Paper elevation={0} sx={{ p: 2 }}>
+    <Paper elevation={0} sx={{ p: 2, width: '95%', mx:'auto' }}>
       <Typography
         variant="h6"
         gutterBottom
@@ -32,14 +32,13 @@ export default function TaskList() {
         <Typography variant="subtitle2">Date Created</Typography>
         <Typography variant="subtitle2">Status</Typography>
         <Typography variant="subtitle2">Assignees</Typography>
-        <Box />
+      <Box />
       </Box>
-
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {tasks.map(task => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {tasks.map(task => (
+            <TaskCard key={task.id} task={task} />
+          ))}
+        </Box>
     </Paper>
   );
 }
