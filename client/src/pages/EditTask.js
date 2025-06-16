@@ -93,7 +93,7 @@ export default function EditTask() {
 
   const handleSave = () => {
     console.log('Saving task:', { id, ...form });
-    history.push('/tasks');
+    history.push('/home');
   };
 
   return (
