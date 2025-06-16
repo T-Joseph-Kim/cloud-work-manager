@@ -1,7 +1,7 @@
 import { Switch, Route, Redirect, useLocation } from 'react-router-dom';
 import { Toolbar, Container } from '@mui/material';import Login from './pages/Login';
 import TaskList from './pages/TaskList';
-import EditTask from './pages/TaskDetails';
+import EditTask from './pages/EditTask';
 import Header from './components/Header';
 import Profile from './pages/Profile';
 
