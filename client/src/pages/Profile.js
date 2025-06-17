@@ -5,10 +5,12 @@ import {
   Typography,
   TextField,
   Paper,
-  IconButton
+  IconButton,
+  Button
 } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { Link } from 'react-router-dom';
 
 export default function Profile() {
@@ -23,19 +25,23 @@ export default function Profile() {
     setProfile({ ...profile, [e.target.name]: e.target.value });
 
   return (
-    <Box sx={{
-    position: 'fixed',
-    inset: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'linear-gradient(135deg, #90caf9 0%, #e3f2fd 100%)'
-  }}>
+    <Box
+      sx={{
+        position: 'fixed',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #90caf9 0%, #e3f2fd 100%)'
+      }}
+    >
       <Paper
         elevation={2}
         sx={{
           position: 'relative',
           p: 4,
+          mt: 5,
+          boxShadow: 8,
           width: '80%',
           maxWidth: '1200px',
           mx: 'auto',
@@ -44,16 +50,17 @@ export default function Profile() {
         }}
       >
         <IconButton
-            component={Link}
-            to="/home"
-            sx={{
+          component={Link}
+          to="/home"
+          sx={{
             position: 'absolute',
             top: 20,
             left: 20,
-            }}
+          }}
         >
-            <ArrowBackIosIcon/>
+          <ArrowBackIosIcon />
         </IconButton>
+
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <Avatar sx={{ width: 250, height: 250, bgcolor: 'primary.light' }}>
             <AccountCircleIcon sx={{ fontSize: 240, color: 'primary.main' }} />
@@ -106,6 +113,17 @@ export default function Profile() {
               InputProps={{ readOnly: true }}
               fullWidth
             />
+
+            <Box sx={{ textAlign: 'right' }}>
+              <Button
+                component={Link}
+                to="/login"
+                variant="outlined"
+                startIcon={<ExitToAppIcon />}
+              >
+                Log Out
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Paper>
