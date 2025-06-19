@@ -9,7 +9,7 @@ export default function App() {
   const { pathname } = useLocation();
   return (
     <>
-    {pathname !== '/signin' && (
+    {pathname !== '/login' && (
         <>
           <Header />
           <Toolbar />

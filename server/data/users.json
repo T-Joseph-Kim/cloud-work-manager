@@ -1,7 +1,7 @@
 {
   "p5tk": { "id": "p5tk", "password": "Password!123" },
-  "l3js": { "id": "j3js", "password": "Secure!234" },
-  "q8mr": { "id": "m8mr", "password": "Example#345" },
-  "p2dj": { "id": "d2dj", "password": "Test$456" },
-  "m7sw": { "id": "s7sw", "password": "Demo%567" }
+  "l3js": { "id": "l3js", "password": "Secure123" },
+  "q8mr": { "id": "q8mr", "password": "Example123" },
+  "p2dj": { "id": "p2dj", "password": "Test123" },
+  "m7sw": { "id": "m7sw", "password": "Demo123" }
 }

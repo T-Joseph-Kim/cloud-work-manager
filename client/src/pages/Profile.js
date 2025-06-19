@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react'
 import {
   Box,
   Avatar,
@@ -7,22 +7,31 @@ import {
   Paper,
   IconButton,
   Button
-} from '@mui/material';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { Link } from 'react-router-dom';
+} from '@mui/material'
+import { Link, useHistory } from 'react-router-dom'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import ArrowBackIosIcon  from '@mui/icons-material/ArrowBackIos'
+import ExitToAppIcon     from '@mui/icons-material/ExitToApp'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchProfile } from '../features/profile/profileSlice'
+import { logout }       from '../features/auth/authSlice'
 
 export default function Profile() {
-  const [profile, setProfile] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    dob: '1990-01-01',
-    memberId: 'm1',
-  });
+  const dispatch = useDispatch()
+  const history  = useHistory()
+  const userId   = useSelector(state => state.auth.currentUser?.id)
+  const profile  = useSelector(state => state.profile.data)
 
-  const handleChange = e =>
-    setProfile({ ...profile, [e.target.name]: e.target.value });
+  useEffect(() => {
+    if (userId) {
+      dispatch(fetchProfile(userId))
+    }
+  }, [dispatch, userId])
+
+  const handleLogout = () => {
+    dispatch(logout())
+    history.push('/login')
+  }
 
   return (
     <Box
@@ -41,22 +50,17 @@ export default function Profile() {
           position: 'relative',
           p: 4,
           mt: 5,
-          boxShadow: 8,
           width: '80%',
           maxWidth: '1200px',
           mx: 'auto',
           borderRadius: 6,
-          minHeight: '60vh',
+          minHeight: '60vh'
         }}
       >
         <IconButton
           component={Link}
           to="/home"
-          sx={{
-            position: 'absolute',
-            top: 20,
-            left: 20,
-          }}
+          sx={{ position: 'absolute', top: 20, left: 20 }}
         >
           <ArrowBackIosIcon />
         </IconButton>
@@ -72,7 +76,7 @@ export default function Profile() {
               flexGrow: 1,
               display: 'flex',
               flexDirection: 'column',
-              gap: 6,
+              gap: 6
             }}
             noValidate
           >
@@ -82,44 +86,36 @@ export default function Profile() {
 
             <TextField
               label="First Name"
-              name="firstName"
-              value={profile.firstName}
-              onChange={handleChange}
+              value={profile?.firstName || ''}
+              InputProps={{ readOnly: true }}
               fullWidth
             />
-
             <TextField
               label="Last Name"
-              name="lastName"
-              value={profile.lastName}
-              onChange={handleChange}
+              value={profile?.lastName || ''}
+              InputProps={{ readOnly: true }}
               fullWidth
             />
-
             <TextField
               label="Date of Birth"
-              name="dob"
               type="date"
-              value={profile.dob}
-              onChange={handleChange}
+              value={profile?.dob || ''}
               InputLabelProps={{ shrink: true }}
+              InputProps={{ readOnly: true }}
               fullWidth
             />
-
             <TextField
-              label="Member ID"
-              name="memberId"
-              value={profile.memberId}
+              label="Employee ID"
+              value={profile?.id || ''}
               InputProps={{ readOnly: true }}
               fullWidth
             />
 
             <Box sx={{ textAlign: 'right' }}>
               <Button
-                component={Link}
-                to="/login"
                 variant="outlined"
                 startIcon={<ExitToAppIcon />}
+                onClick={handleLogout}
               >
                 Log Out
               </Button>
@@ -128,5 +124,5 @@ export default function Profile() {
         </Box>
       </Paper>
     </Box>
-  );
+  )
 }
