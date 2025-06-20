@@ -1,100 +1,106 @@
-import { useState, useEffect } from 'react';
-import { useParams, useHistory, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react'
+import { useParams, useHistory, Link } from 'react-router-dom'
 import {
+  Box,
   Paper,
   Typography,
-  Box,
   TextField,
   MenuItem,
   Button
-} from '@mui/material';
-import Autocomplete from '@mui/material/Autocomplete';
-
-const employeeOptions = [
-  { id: 'm1', name: 'John Doe' },
-  { id: 'm2', name: 'Jane Smith' },
-  { id: 'm3', name: 'Bob Johnson' }
-];
+} from '@mui/material'
+import Autocomplete from '@mui/material/Autocomplete'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  fetchTaskById,
+  updateTask,
+  deleteTask,
+  selectTaskById
+} from '../features/tasks/tasksSlice'
+import {
+  fetchMembers,
+  selectAllMembers
+} from '../features/members/membersSlice'
 
 const statusOptions = [
   'Not Started',
   'In Review',
   'In Progress',
   'Completed'
-];
-
-const tasks = [
-  {
-    id: '1',
-    name: 'Task 1',
-    dateCreated: '2025-06-01',
-    status: 'In Review',
-    employeeIds: ['m1','m2'],
-    description: 'Lorem ipsum dolor sit amet.'
-  },
-  {
-    id: '2',
-    name: 'Task 2',
-    dateCreated: '2025-06-02',
-    status: 'Completed',
-    employeeIds: ['m2','m3','m1'],
-    description: 'Consectetur adipiscing elit.'
-  },
-  {
-    id: '3',
-    name: 'Task 3',
-    dateCreated: '2025-06-03',
-    status: 'Not Started',
-    employeeIds: ['m1'],
-    description: 'Sed do eiusmod tempor.'
-  },
-  {
-    id: '4',
-    name: 'Task 4',
-    dateCreated: '2025-06-03',
-    status: 'Not Started',
-    employeeIds: ['m1'],
-    description: 'Sed do eiusmod tempor.'
-  }
-];
+]
 
 export default function EditTask() {
-  const { id } = useParams();
-  const history = useHistory();
-  const task = tasks.find(t => t.id === id);
+  const { id } = useParams()
+  const history = useHistory()
+  const dispatch = useDispatch()
+
+  const task = useSelector(state => selectTaskById(state, id))
+  const members = useSelector(selectAllMembers)
+
   const [form, setForm] = useState({
     name: '',
     dateCreated: '',
     status: '',
     assignees: [],
     description: ''
-  });
+  })
 
+  // fetch task + member list on mount
   useEffect(() => {
-    if (task) {
+    dispatch(fetchTaskById(id))
+    dispatch(fetchMembers())
+  }, [dispatch, id])
+
+  // when task loads, seed the form
+  useEffect(() => {
+    if (task && members.length) {
       setForm({
         name: task.name,
         dateCreated: task.dateCreated,
         status: task.status,
         description: task.description,
-        assignees: employeeOptions.filter(e => task.employeeIds.includes(e.id))
-      });
+        assignees: members.filter(m => task.employeeIds.includes(m.id))
+      })
     }
-  }, [task]);
+  }, [task, members])
 
   if (!task) {
-    return <Typography>Task not found</Typography>;
+    return (
+      <Typography
+        sx={{ mt: 4, textAlign: 'center' }}
+        variant="h6"
+      >
+        Loading task…
+      </Typography>
+    )
   }
 
   const handleChange = e => {
-    const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
-  };
+    const { name, value } = e.target
+    setForm(f => ({ ...f, [name]: value }))
+  }
 
-  const handleSave = () => {
-    console.log('Saving task:', { id, ...form });
-    history.push('/home');
-  };
+  const handleSave = async () => {
+    await dispatch(
+      updateTask({
+        id,
+        changes: {
+          name: form.name,
+          dateCreated: form.dateCreated,
+          status: form.status,
+          description: form.description,
+          employeeIds: form.assignees.map(a => a.id)
+        }
+      })
+    ).unwrap()
+    history.push('/home')
+  }
+
+  const handleDelete = async () => {
+    if (window.confirm('Delete this task?')) {
+      await dispatch(deleteTask(id)).unwrap()
+      history.push('/home')
+    }
+  }
 
   return (
     <Box
@@ -119,6 +125,7 @@ export default function EditTask() {
         <Typography variant="h5" gutterBottom>
           Edit Task
         </Typography>
+
         <Box
           component="form"
           noValidate
@@ -135,6 +142,7 @@ export default function EditTask() {
             onChange={handleChange}
             fullWidth
           />
+
           <TextField
             label="Description"
             name="description"
@@ -144,6 +152,7 @@ export default function EditTask() {
             rows={4}
             fullWidth
           />
+
           <TextField
             label="Date Created"
             name="dateCreated"
@@ -153,6 +162,7 @@ export default function EditTask() {
             InputLabelProps={{ shrink: true }}
             fullWidth
           />
+
           <TextField
             select
             label="Status"
@@ -167,10 +177,11 @@ export default function EditTask() {
               </MenuItem>
             ))}
           </TextField>
+
           <Autocomplete
             multiple
-            options={employeeOptions}
-            getOptionLabel={o => o.name}
+            options={members}
+            getOptionLabel={m => `${m.firstName} ${m.lastName}`}
             value={form.assignees}
             onChange={(_, newVal) =>
               setForm(f => ({ ...f, assignees: newVal }))
@@ -184,10 +195,24 @@ export default function EditTask() {
               />
             )}
           />
+
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-            <Button component={Link} to="/tasks">
-              Cancel
-            </Button>
+            <Box>
+              <Button
+                component={Link}
+                to="/home"
+              >
+                Cancel
+              </Button>
+              <Button
+                color="error"
+                onClick={handleDelete}
+                sx={{ ml: 2 }}
+              >
+                Delete
+              </Button>
+            </Box>
+
             <Button
               variant="contained"
               onClick={handleSave}
@@ -199,5 +224,5 @@ export default function EditTask() {
         </Box>
       </Paper>
     </Box>
-  );
+  )
 }

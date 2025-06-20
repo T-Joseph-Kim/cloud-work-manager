@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/components/Header.js
+import React, { useState, useEffect } from 'react'
 import {
   AppBar,
   Toolbar,
@@ -7,29 +8,33 @@ import {
   Box,
   Tooltip,
   TextField,
-  Autocomplete
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { useHistory, Link } from 'react-router-dom';
+  Autocomplete,
+  InputAdornment
+} from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import { useHistory, Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchTasks } from '../features/tasks/tasksSlice'
 
 export default function Header() {
-  const history = useHistory();
-  const [inputValue, setInputValue] = useState('');
+  const history  = useHistory()
+  const dispatch = useDispatch()
+  const [inputValue, setInputValue] = useState('')
+  const [focused, setFocused] = useState(false)
 
-  const tasks = [
-    { id: '1', name: 'Task 1' },
-    { id: '2', name: 'Task 2' },
-    { id: '3', name: 'Task 3' },
-    { id: '1', name: 'Task 1' },
-    { id: '2', name: 'Task 2' },
-    { id: '3', name: 'Task 3' },
-    { id: '1', name: 'Task 1' },
-    { id: '2', name: 'Task 2' },
-    { id: '3', name: 'Task 3' },
-  ];
+  const { items: allTasks, status } = useSelector(s => s.tasks)
+  const currentUser = useSelector(s => s.auth.currentUser)
 
-  const handleProfileClick = () => history.push('/profile');
+  useEffect(() => {
+    if (status === 'idle') dispatch(fetchTasks())
+  }, [status, dispatch])
+
+  const myTasks = allTasks.filter(
+    t => Array.isArray(t.employeeIds) && t.employeeIds.includes(currentUser.id)
+  )
+
+  const handleProfileClick = () => history.push('/profile')
 
   return (
     <AppBar
@@ -39,11 +44,10 @@ export default function Header() {
         width: '100%',
         bgcolor: 'white',
         boxShadow: 1,
-        zIndex: (theme) => theme.zIndex.drawer + 1
+        zIndex: theme => theme.zIndex.drawer + 1
       }}
     >
       <Toolbar sx={{ display: 'flex', alignItems: 'center' }}>
-        {/* Home button */}
         <Tooltip title="Home" arrow>
           <Box
             component={Link}
@@ -69,16 +73,19 @@ export default function Header() {
 
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* Task search */}
         <Autocomplete
           size="small"
-          options={tasks}
-          getOptionLabel={(opt) => opt.name}
+          freeSolo
+          disableClearable
+          options={myTasks}
+          getOptionLabel={opt => opt.name || ''}
           inputValue={inputValue}
-          onInputChange={(_, value) => setInputValue(value)}
-          open={inputValue.length > 0}
+          onInputChange={(_, v) => setInputValue(v)}
+          open={focused && Boolean(inputValue)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           onChange={(_, value) => {
-            if (value) {
+            if (value?.id) {
               history.push(`/tasks/${value.id}`);
               setInputValue('');
             }
@@ -89,32 +96,35 @@ export default function Header() {
               bgcolor: 'common.white',
               maxHeight: 200,
               overflowY: 'auto',
-              '& .MuiAutocomplete-option': {
-                typography: 'body2',
-                px: 1
-              }
+              '& .MuiAutocomplete-option': { typography: 'body2', px: 1 }
             }
           }}
-          renderInput={(params) => (
+          renderInput={params => (
             <TextField
               {...params}
               placeholder="Search tasks..."
               variant="outlined"
               sx={{
-                width: 180,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '24px'
-                },
+                width: 200,
+                '& .MuiOutlinedInput-root': { borderRadius: '24px' },
                 '& .MuiAutocomplete-popupIndicator, & .MuiAutocomplete-popupIndicatorOpen': {
-                  transform: 'none !important',
+                  transform: 'none !important'
                 }
+              }}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <SearchIcon />
+                  </InputAdornment>
+                )
               }}
             />
           )}
           noOptionsText="No tasks found"
         />
 
-        <Tooltip title="Profile Settings" arrow>
+        <Tooltip title="Your Profile" arrow>
           <IconButton onClick={handleProfileClick} sx={{ ml: 1 }}>
             <AccountCircleIcon
               sx={{
@@ -128,5 +138,5 @@ export default function Header() {
         </Tooltip>
       </Toolbar>
     </AppBar>
-  );
+  )
 }

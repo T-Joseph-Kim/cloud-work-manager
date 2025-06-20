@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -10,36 +10,41 @@ import {
   MenuItem,
   Box,
   Chip
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import Autocomplete from '@mui/material/Autocomplete';
-
-const employeeOptions = [
-  { id: 'm1', name: 'John Doe' },
-  { id: 'm2', name: 'Jane Smith' },
-  { id: 'm3', name: 'Bob Johnson' },
-];
+} from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
+import Autocomplete from '@mui/material/Autocomplete'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchMembers, selectAllMembers } from '../../features/members/membersSlice'
 
 const statusOptions = [
   'Not Started',
   'In Review',
   'In Progress',
   'Completed'
-];
+]
 
 export default function AddTaskForm({ open, onClose, onCreate }) {
+  const dispatch = useDispatch()
+  const members = useSelector(selectAllMembers)
+
   const [form, setForm] = useState({
     name: '',
+    description: '',
     dateCreated: '',
     status: '',
-    assignees: [],
-    description: ''
-  });
+    assignees: []
+  })
+
+  useEffect(() => {
+    if (members.length === 0) {
+      dispatch(fetchMembers())
+    }
+  }, [members, dispatch])
 
   const handleChange = e => {
-    const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
-  };
+    const { name, value } = e.target
+    setForm(f => ({ ...f, [name]: value }))
+  }
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -106,17 +111,13 @@ export default function AddTaskForm({ open, onClose, onCreate }) {
 
           <Autocomplete
             multiple
-            options={employeeOptions}
-            getOptionLabel={opt => opt.name}
+            options={members}
+            getOptionLabel={opt => opt.firstName + ' ' + opt.lastName}
             value={form.assignees}
             onChange={(_, newVal) => setForm(f => ({ ...f, assignees: newVal }))}
             renderTags={(value, getTagProps) =>
               value.map((option, i) => (
-                <Chip
-                  key={option.id}
-                  label={option.name}
-                  {...getTagProps({ index: i })}
-                />
+                <Chip key={option.id} label={`${option.firstName} ${option.lastName}`} {...getTagProps({ index: i })} />
               ))
             }
             renderInput={params => (
@@ -136,8 +137,9 @@ export default function AddTaskForm({ open, onClose, onCreate }) {
         <Button
           variant="contained"
           onClick={() => {
-            onCreate(form);
-            onClose();
+            onCreate(form)
+            onClose()
+            setForm({ name: '', description: '', dateCreated: '', status: '', assignees: [] })
           }}
           disabled={!form.name || !form.dateCreated || !form.status}
         >
@@ -145,5 +147,5 @@ export default function AddTaskForm({ open, onClose, onCreate }) {
         </Button>
       </DialogActions>
     </Dialog>
-  );
+  )
 }

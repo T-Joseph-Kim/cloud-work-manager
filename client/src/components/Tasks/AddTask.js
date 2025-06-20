@@ -1,15 +1,25 @@
-import React, { useState } from 'react';
-import { Card, Box, Typography, IconButton } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import AddTaskForm from './AddTaskForm';
+import React, { useState } from 'react'
+import { Card, Box, Typography, IconButton } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import AddTaskForm from './AddTaskForm'
+import { useDispatch } from 'react-redux'
+import { createTask } from '../../features/tasks/tasksSlice'
 
-export default function AddTask({ onCreate }) {
-  const [open, setOpen] = useState(false);
+export default function AddTask() {
+  const [open, setOpen] = useState(false)
+  const dispatch = useDispatch()
 
-  const handleCreate = (newTask) => {
-    onCreate(newTask);
-    setOpen(false);
-  };
+  const handleCreate = (form) => {
+    const employeeIds = form.assignees.map(a => a.id)
+    dispatch(createTask({ 
+      name: form.name,
+      description: form.description,
+      dateCreated: form.dateCreated,
+      status: form.status,
+      employeeIds
+    }))
+    setOpen(false)
+  }
 
   return (
     <>
@@ -27,23 +37,12 @@ export default function AddTask({ onCreate }) {
           borderRadius: 4,
           cursor: 'pointer',
           transition: 'background-color 0.15s',
-          '&:hover': {
-            backgroundColor: 'action.hover',
-          },
+          '&:hover': { backgroundColor: 'action.hover' }
         }}
       >
         <Typography variant="body1">Add New Task</Typography>
-        <Box />
-        <Box />
-        <Box />
-        <IconButton
-          onClick={() => setOpen(true)}
-          sx={{
-            width: 32,
-            height: 32,
-            '&:hover': { color: 'gray.600' },
-          }}
-        >
+        <Box /><Box /><Box />
+        <IconButton sx={{ width: 32, height: 32, '&:hover': { color: 'gray.600' } }}>
           <AddIcon fontSize="small" />
         </IconButton>
       </Card>
@@ -54,5 +53,5 @@ export default function AddTask({ onCreate }) {
         onCreate={handleCreate}
       />
     </>
-  );
+  )
 }
