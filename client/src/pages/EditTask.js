@@ -6,7 +6,10 @@ import {
   Typography,
   TextField,
   MenuItem,
-  Button
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogActions
 } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useDispatch, useSelector } from 'react-redux'
@@ -43,6 +46,8 @@ export default function EditTask() {
     assignees: [],
     description: ''
   })
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // fetch task + member list on mount
   useEffect(() => {
@@ -96,10 +101,8 @@ export default function EditTask() {
   }
 
   const handleDelete = async () => {
-    if (window.confirm('Delete this task?')) {
-      await dispatch(deleteTask(id)).unwrap()
-      history.push('/home')
-    }
+    await dispatch(deleteTask(id)).unwrap()
+    history.push('/home')
   }
 
   return (
@@ -205,9 +208,9 @@ export default function EditTask() {
                 Cancel
               </Button>
               <Button
-                color="error"
-                onClick={handleDelete}
+                color = "error"
                 sx={{ ml: 2 }}
+                onClick={() => setConfirmOpen(true)}
               >
                 Delete
               </Button>
@@ -223,6 +226,25 @@ export default function EditTask() {
           </Box>
         </Box>
       </Paper>
+      <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+      >
+        <DialogTitle>
+          Are you sure you want to delete this task?
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>
+            Cancel
+          </Button>
+          <Button color="error" onClick={async () => {
+              await handleDelete();
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
