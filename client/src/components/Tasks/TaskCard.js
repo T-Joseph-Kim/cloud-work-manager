@@ -107,7 +107,9 @@ export default function TaskCard({ task }) {
           sx={{
             bgcolor: statusColors[task.status] || 'grey',
             color: 'white',
-            borderRadius: '8px'
+            borderRadius: '8px',
+            pointerEvents: 'none',
+            cursor: 'default'
           }}
         />
 
@@ -180,7 +182,7 @@ export default function TaskCard({ task }) {
       {/* Single-Member Detail Dialog */}
       <Dialog open={detailOpen} onClose={closeDetail}>
         <DialogTitle sx={{ position: 'relative', pr: 6 }}>
-          Member Details
+          Employee Details
           <IconButton
             onClick={closeDetail}
             sx={{ position: 'absolute', right: 8, top: 10 }}

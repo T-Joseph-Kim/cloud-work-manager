@@ -53,11 +53,11 @@
     "name": "Refactor Legacy Authentication Code",
     "dateCreated": "2025-06-07",
     "description": "Clean up and modularize the legacy login module to improve maintainability and security.",
-    "status": "In Progress",
+    "status": "Completed",
     "owner": "p5tk",
     "employeeIds": [
-      "p5tk",
-      "q8mr"
+      "q8mr",
+      "p5tk"
     ]
   },
   {
