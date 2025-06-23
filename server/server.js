@@ -1,23 +1,24 @@
-// server.js
-const express    = require('express');
-const cors       = require('cors');
-const bodyParser = require('body-parser');
-const path       = require('path');
-const fs         = require('fs').promises;
+// module imports & setup
+const express    = require('express'); // framework for routes/handlers
+const cors       = require('cors'); // middleware to allow cross-origin requests
+const bodyParser = require('body-parser'); // parses JSON request bodies for req.body
+const path       = require('path'); // building filesystem paths
+const fs         = require('fs').promises; // file system API so we can await reads/writes
 
-const DATA_PATH  = path.join(__dirname, 'data', 'tasks.json');
-const members    = require(path.join(__dirname, 'data', 'members.json'));
-const users      = require(path.join(__dirname, 'data', 'users.json'));
+const DATA_PATH  = path.join(__dirname, 'data', 'tasks.json'); // path to tasks data file (our "database")
+const members    = require(path.join(__dirname, 'data', 'members.json')); // path to members data file (employees)
+const users      = require(path.join(__dirname, 'data', 'users.json')); // path to users data file (for auth services)
 
+// create express app instance and configure middleware cors for requests
 const app = express();
 app.use(cors());
-app.use((req, res, next) => {
+app.use((req, res, next) => { // prints incoming request methods + URLs
   console.log(`${req.method} ${req.url}`);
   next();
 });
-app.use(bodyParser.json());
+app.use(bodyParser.json()); // parses JSON request bodies into req.body
 
-// helper to load & save tasks.json
+// Helpers to load and update/save tasks to tasks.json using fs.promises
 async function loadTasks() {
   const raw = await fs.readFile(DATA_PATH, 'utf8');
   return JSON.parse(raw);
@@ -26,7 +27,7 @@ async function saveTasks(tasks) {
   await fs.writeFile(DATA_PATH, JSON.stringify(tasks, null, 2));
 }
 
-// auth
+// Authentication endpoint, checks id password against users object, data is static in users.json
 app.post('/api/login', (req, res) => {
   const { id, password } = req.body;
   const user = users[id];
@@ -36,13 +37,13 @@ app.post('/api/login', (req, res) => {
   res.json({ id });
 });
 
-// list all
+// list all tasks using tasks object
 app.get('/api/tasks', async (req, res) => {
   const tasks = await loadTasks();
   res.json(tasks);
 });
 
-// get one
+// get one task by ID using find function
 app.get('/api/tasks/:id', async (req, res) => {
   const tasks = await loadTasks();
   const task  = tasks.find(t => t.id === req.params.id);
@@ -50,7 +51,8 @@ app.get('/api/tasks/:id', async (req, res) => {
   res.json(task);
 });
 
-// create
+// create a new task, assigns a unique ID using Date.now() and gets request body
+// creates a new task object and appends it to tasks array and saves it with saveTasks
 app.post('/api/tasks', async (req, res) => {
   const tasks   = await loadTasks();
   const newTask = { id: Date.now().toString(), ...req.body };
@@ -59,7 +61,8 @@ app.post('/api/tasks', async (req, res) => {
   res.status(201).json(newTask);
 });
 
-// update
+// update an existing task by ID using findIndex to locate it
+// merges existing task with request body using spread operator
 app.put('/api/tasks/:id', async (req, res) => {
   const tasks = await loadTasks();
   const idx   = tasks.findIndex(t => t.id === req.params.id);
@@ -69,7 +72,7 @@ app.put('/api/tasks/:id', async (req, res) => {
   res.json(tasks[idx]);
 });
 
-// delete
+// delete a task by ID using filter to remove it from tasks array, saveaTasks to update
 app.delete('/api/tasks/:id', async (req, res) => {
   const tasks    = await loadTasks();
   const filtered = tasks.filter(t => t.id !== req.params.id);
@@ -80,13 +83,14 @@ app.delete('/api/tasks/:id', async (req, res) => {
   res.status(204).end();
 });
 
-// member lookup
+// member lookup by ID using members object, data is static in members.json
 app.get('/api/members/:memberId', (req, res) => {
   const member = members[req.params.memberId];
   if (!member) return res.status(404).json({ error: 'Member not found' });
   res.json(member);
 });
 
+// sets up the server to listen for incoming requests using app.listen()
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
