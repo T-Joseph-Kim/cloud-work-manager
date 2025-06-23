@@ -1,12 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-// Fetch all members
+// Fetch all members with createAsyncThunk
+// API call, HTTP GET request to /api/members using axios
 export const fetchMembers = createAsyncThunk(
   'members/fetchMembers',
   async () => {
     const resp = await axios.get('/api/members')
-    return Object.values(resp.data)
+    return Object.values(resp.data) // Convert object to array
   }
 )
 
