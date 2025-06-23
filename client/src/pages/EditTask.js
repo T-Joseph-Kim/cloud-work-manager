@@ -219,7 +219,7 @@ export default function EditTask() {
             <Button
               variant="contained"
               onClick={handleSave}
-              disabled={!form.name || !form.dateCreated || !form.status}
+              disabled={!form.name || !form.dateCreated || !form.status || !form.description || form.assignees.length === 0}
             >
               Save Changes
             </Button>
@@ -231,7 +231,9 @@ export default function EditTask() {
         onClose={() => setConfirmOpen(false)}
       >
         <DialogTitle>
-          Are you sure you want to delete this task?
+          {task.status !== 'Completed'
+          ? `Are you sure you want to delete this task? It's still in its "${task.status}" phase!`
+          : 'Are you sure you want to delete this completed task?'}
         </DialogTitle>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>

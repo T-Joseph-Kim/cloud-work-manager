@@ -141,7 +141,7 @@ export default function AddTaskForm({ open, onClose, onCreate }) {
             onClose()
             setForm({ name: '', description: '', dateCreated: '', status: '', assignees: [] })
           }}
-          disabled={!form.name || !form.dateCreated || !form.status}
+          disabled={!form.name || !form.dateCreated || !form.status || !form.description || form.assignees.length === 0}
         >
           Create
         </Button>
