@@ -20,6 +20,7 @@ export const fetchMember = createAsyncThunk(
   }
 )
 
+// piece of state management logic and defines members slice behavior
 const membersSlice = createSlice({
   name: 'members',
   initialState: {
@@ -31,22 +32,28 @@ const membersSlice = createSlice({
   reducers: {},
   extraReducers: builder => {
     builder
+      // reducer that handles pending state of fetchMembers async
       .addCase(fetchMembers.pending, state => {
         state.status = 'loading'
       })
+
+      // reducer that handles the fulfilled state of fetchMembers async
       .addCase(fetchMembers.fulfilled, (state, { payload }) => {
-        state.items = payload
+        state.items = payload // array of members
         state.status = 'succeeded'
-        state.entities = payload.reduce((m, member) => {
+        state.entities = payload.reduce((m, member) => { // map of members, id as key]
           m[member.id] = member
           return m
         }, {})
       })
+
+      // handles rejected fetchMembers async thunk, sets status to error
       .addCase(fetchMembers.rejected, (state, action) => {
         state.status = 'error'
         state.error = action.error.message
       })
-
+      
+      // adds fetched member to entities object and items array if not already present
       .addCase(fetchMember.fulfilled, (state, { payload }) => {
         state.entities[payload.id] = payload
         if (!state.items.find(m => m.id === payload.id)) {
@@ -55,8 +62,9 @@ const membersSlice = createSlice({
       })
   }
 })
+// selectors to access members state
+export const selectAllMembers   = state => state.members.items // retrives the items property from the members slice as an array (items)
+export const selectMemberEntities = state => state.members.entities // retrieves the entities property from the members slice as an object (entities)
 
-export const selectAllMembers   = state => state.members.items
-export const selectMemberEntities = state => state.members.entities
-
+// exports reducer function to be used in store.js
 export default membersSlice.reducer
