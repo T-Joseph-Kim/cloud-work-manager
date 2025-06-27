@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
-import { Paper, Typography, Box } from '@mui/material'
+import { useEffect, useState } from 'react'
+import { Paper, Typography, Box, Alert, Snackbar } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchTasks } from '../features/tasks/tasksSlice'
+import { fetchTasks, deleteTask } from '../features/tasks/tasksSlice'
 import TaskCard from '../components/Tasks/TaskCard'
 import AddTask from '../components/Tasks/AddTask'
 
@@ -24,6 +24,15 @@ export default function TaskList() {
   const sortedTasks = [...myTasks].sort(
     (a, b) => new Date(b.dateCreated) - new Date(a.dateCreated)
   )
+  const [deletedOpen, setDeletedOpen] = useState(false)
+
+  const handleDelete = id => {
+    dispatch(deleteTask(id))
+      .unwrap()
+      .then(() => {
+        setDeletedOpen(true)
+      })
+  }
 
   return (
     <Paper elevation={0} sx={{ p: 2, width: '95%', mx:'auto' }}>
@@ -51,9 +60,16 @@ export default function TaskList() {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <AddTask />
         {sortedTasks.map(task => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} onDelete={handleDelete} />
         ))}
       </Box>
+      <Snackbar
+        open={deletedOpen}
+        autoHideDuration={3000}
+        onClose={() => setDeletedOpen(false)}
+      >
+        <Alert severity="success">Task successfully deleted!</Alert>
+      </Snackbar>
     </Paper>
   )
 }

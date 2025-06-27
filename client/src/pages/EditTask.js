@@ -1,28 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useParams, useHistory, Link } from 'react-router-dom'
-import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  MenuItem,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogActions
-} from '@mui/material'
-import Autocomplete from '@mui/material/Autocomplete'
+import { useParams } from 'react-router-dom'
+import { Box, Typography } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  fetchTaskById,
-  updateTask,
-  deleteTask,
-  selectTaskById
-} from '../features/tasks/tasksSlice'
-import {
-  fetchMembers,
-  selectAllMembers
-} from '../features/members/membersSlice'
+import { fetchTaskById, updateTask, selectTaskById } from '../features/tasks/tasksSlice'
+import { fetchMembers, selectAllMembers } from '../features/members/membersSlice'
+
+import NameDescriptionCard from '../components/Tasks/NameDescription'
+import DateStatusCard      from '../components/Tasks/DateStatus'
+import AssigneesCard       from '../components/Tasks/Assignees'
 
 const statusOptions = [
   'Not Started',
@@ -33,220 +18,107 @@ const statusOptions = [
 
 export default function EditTask() {
   const { id } = useParams()
-  const history = useHistory()
   const dispatch = useDispatch()
 
   const task = useSelector(state => selectTaskById(state, id))
-  const members = useSelector(selectAllMembers)
+  const allMembers = useSelector(selectAllMembers)
 
-  const [form, setForm] = useState({
-    name: '',
-    dateCreated: '',
-    status: '',
-    assignees: [],
-    description: ''
-  })
+  const [editingMain, setEditingMain] = useState(false)
+  const [editingMeta, setEditingMeta] = useState(false)
 
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [mainForm, setMainForm] = useState({ name: '', description: '' })
+  const [metaForm, setMetaForm] = useState({ dateCreated: '', status: '' })
+  const [assignees, setAssignees] = useState([])
 
-  // fetch task + member list on mount
+  const [addOpen, setAddOpen] = useState(false)
+  const [selectedForAdd, setSelectedForAdd] = useState([])
+  const [selectedMember,  setSelectedMember]  = useState(null)
+
   useEffect(() => {
     dispatch(fetchTaskById(id))
     dispatch(fetchMembers())
   }, [dispatch, id])
 
-  // when task loads, seed the form
   useEffect(() => {
-    if (task && members.length) {
-      setForm({
-        name: task.name,
-        dateCreated: task.dateCreated,
-        status: task.status,
-        description: task.description,
-        assignees: members.filter(m => task.employeeIds.includes(m.id))
-      })
+    if (task && allMembers.length) {
+      setMainForm({ name: task.name, description: task.description })
+      setMetaForm({ dateCreated: task.dateCreated, status: task.status })
+      const current = allMembers.filter(m => task.employeeIds.includes(m.id))
+      setAssignees(current)
+      setSelectedMember(current[0] || null)
     }
-  }, [task, members])
+  }, [task, allMembers])
+
+  const handleMainEdit = () => setEditingMain(true)
+  const handleMainSave = async () => {
+    await dispatch(updateTask({ id, changes: { name: mainForm.name, description: mainForm.description } })).unwrap()
+    setEditingMain(false)
+  }
+
+  const handleMetaEdit = () => setEditingMeta(true)
+  const handleMetaSave = async () => {
+    await dispatch(updateTask({ id, changes: { dateCreated: metaForm.dateCreated, status: metaForm.status } })).unwrap()
+    setEditingMeta(false)
+  }
+
+  const handleAssigneeRemove = async memberId => {
+    const updated = assignees.filter(m => m.id !== memberId)
+    await dispatch(updateTask({ id, changes: { employeeIds: updated.map(m => m.id) } })).unwrap()
+    setAssignees(updated)
+    if (selectedMember?.id === memberId) setSelectedMember(updated[0] || null)
+  }
+
+  const handleAssigneeAdd = async () => {
+    const updated = [...assignees, ...selectedForAdd]
+    await dispatch(updateTask({ id, changes: { employeeIds: updated.map(m => m.id) } })).unwrap()
+    setAssignees(updated)
+    setAddOpen(false)
+    setSelectedForAdd([])
+    setSelectedMember(updated[0] || null)
+  }
 
   if (!task) {
-    return (
-      <Typography
-        sx={{ mt: 4, textAlign: 'center' }}
-        variant="h6"
-      >
-        Loading task…
-      </Typography>
-    )
+    return <Typography sx={{ mt:4, textAlign:'center' }} variant="h6">Loading task…</Typography>
   }
-
-  const handleChange = e => {
-    const { name, value } = e.target
-    setForm(f => ({ ...f, [name]: value }))
-  }
-
-  const handleSave = async () => {
-    await dispatch(
-      updateTask({
-        id,
-        changes: {
-          name: form.name,
-          dateCreated: form.dateCreated,
-          status: form.status,
-          description: form.description,
-          employeeIds: form.assignees.map(a => a.id)
-        }
-      })
-    ).unwrap()
-    history.push('/home')
-  }
-
-  const handleDelete = async () => {
-    await dispatch(deleteTask(id)).unwrap()
-    history.push('/home')
-  }
+  const availableMembers = allMembers.filter(m => !assignees.find(a => a.id === m.id))
 
   return (
-    <Box
-      sx={{
-        position: 'fixed',
-        inset: 0,
-        background: 'linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%)',
-        overflow: 'auto',
-        p: 4
-      }}
-    >
-      <Paper
-        sx={{
-          mt: 5,
-          p: 4,
-          maxWidth: 1000,
-          mx: 'auto',
-          borderRadius: 2,
-          bgcolor: 'background.paper'
-        }}
-      >
-        <Typography variant="h5" gutterBottom>
-          Edit Task
-        </Typography>
-
-        <Box
-          component="form"
-          noValidate
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 3
-          }}
-        >
-          <TextField
-            label="Task Name"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            fullWidth
+    <Box sx={{ p:4,  position: 'fixed', inset: 0, background: 'linear-gradient(135deg, #90caf9 0%, #e3f2fd 100%)', minHeight:'100vh' }}>
+      <Typography variant="h5" gutterBottom sx={{ mt: 7, ml: 1 }}>Details for Task ID: {task.id}</Typography>
+      <Box sx={{ display:'flex', gap:2, my:2 }}>
+        <Box sx={{ flex:1, display:'flex', flexDirection:'column', gap:2 }}>
+          <NameDescriptionCard
+            editing={editingMain}
+            form={mainForm}
+            onEdit={handleMainEdit}
+            onSave={handleMainSave}
+            onChange={e => setMainForm(f => ({ ...f, [e.target.name]: e.target.value }))}
           />
 
-          <TextField
-            label="Description"
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            multiline
-            rows={4}
-            fullWidth
+          <DateStatusCard
+            editing={editingMeta}
+            form={metaForm}
+            statusOptions={statusOptions}
+            onEdit={handleMetaEdit}
+            onSave={handleMetaSave}
+            onChange={e => setMetaForm(f => ({ ...f, [e.target.name]: e.target.value }))}
           />
-
-          <TextField
-            label="Date Created"
-            name="dateCreated"
-            type="date"
-            value={form.dateCreated}
-            onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-          />
-
-          <TextField
-            select
-            label="Status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            fullWidth
-          >
-            {statusOptions.map(opt => (
-              <MenuItem key={opt} value={opt}>
-                {opt}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <Autocomplete
-            multiple
-            options={members}
-            getOptionLabel={m => `${m.firstName} ${m.lastName}`}
-            value={form.assignees}
-            onChange={(_, newVal) =>
-              setForm(f => ({ ...f, assignees: newVal }))
-            }
-            renderInput={params => (
-              <TextField
-                {...params}
-                label="Assignees"
-                placeholder="Select employees"
-                fullWidth
-              />
-            )}
-          />
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-            <Box>
-              <Button
-                component={Link}
-                to="/home"
-              >
-                Cancel
-              </Button>
-              <Button
-                color = "error"
-                sx={{ ml: 2 }}
-                onClick={() => setConfirmOpen(true)}
-              >
-                Delete
-              </Button>
-            </Box>
-
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={!form.name || !form.dateCreated || !form.status || !form.description || form.assignees.length === 0}
-            >
-              Save Changes
-            </Button>
-          </Box>
         </Box>
-      </Paper>
-      <Dialog
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-      >
-        <DialogTitle>
-          {task.status !== 'Completed'
-          ? `Are you sure you want to delete this task? It's still in its "${task.status}" phase!`
-          : 'Are you sure you want to delete this completed task?'}
-        </DialogTitle>
-        <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>
-            Cancel
-          </Button>
-          <Button color="error" onClick={async () => {
-              await handleDelete();
-            }}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+
+        <AssigneesCard
+          assignees={assignees}
+          selectedMember={selectedMember}
+          onSelectMember={setSelectedMember}
+          onRemoveMember={handleAssigneeRemove}
+          onAddOpen={() => setAddOpen(true)}
+          onAddClose={() => setAddOpen(false)}
+          addOpen={addOpen}
+          available={availableMembers}
+          selectedForAdd={selectedForAdd}
+          onAddChange={(_, val) => setSelectedForAdd(val)}
+          onAdd={handleAssigneeAdd}
+        />
+      </Box>
     </Box>
   )
 }

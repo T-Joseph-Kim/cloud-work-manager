@@ -10,15 +10,16 @@ import {
   DialogTitle,
   DialogContent,
   Grid,
-  Tooltip
+  Tooltip,
+  Button,
+  DialogActions
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchMember } from '../../features/members/membersSlice'
 
-// Helper to format date with ordinals
 function getOrdinal(day) {
   if (day % 100 >= 11 && day % 100 <= 13) return 'th'
   switch (day % 10) {
@@ -43,29 +44,27 @@ const statusColors = {
   'In Progress': '#2196f3'
 }
 
-export default function TaskCard({ task }) {
+export default function TaskCard({ task, onDelete }) {
   const dispatch   = useDispatch()
   const members    = useSelector(state => state.members.entities)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const ids        = Array.isArray(task.employeeIds) ? task.employeeIds : []
+  const ids        = React.useMemo(
+    () => Array.isArray(task.employeeIds) ? task.employeeIds : [],
+    [task.employeeIds]
+  )
 
-  const [detailOpen, setDetailOpen]       = useState(false)
-  const [listOpen, setListOpen]           = useState(false)
+  const [detailOpen, setDetailOpen]         = useState(false)
+  const [listOpen, setListOpen]             = useState(false)
   const [selectedMember, setSelectedMember] = useState(null)
 
   useEffect(() => {
     ids.forEach(id => {
-      if (!members[id]) {
-        dispatch(fetchMember(id))
-      }
+      if (!members[id]) dispatch(fetchMember(id))
     })
   }, [ids, members, dispatch])
 
   const openDetail = id => {
     const mem = members[id]
-    if (mem) {
-      setSelectedMember(mem)
-    }
+    if (mem) setSelectedMember(mem)
     setDetailOpen(true)
   }
 
@@ -74,9 +73,25 @@ export default function TaskCard({ task }) {
     setSelectedMember(null)
   }
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
+  const openConfirm = e => {
+    e.preventDefault()
+    e.stopPropagation()
+    setConfirmOpen(true)
+  }
+  const closeConfirm = () => setConfirmOpen(false)
+
+  const handleDelete = async () => {
+    await onDelete(task.id)
+    setConfirmOpen(false)
+  }
+
   return (
     <>
       <Card
+        component={Link}
+        to={`/tasks/${task.id}`}
         variant="outlined"
         sx={{
           display: 'grid',
@@ -85,6 +100,8 @@ export default function TaskCard({ task }) {
           p: 2,
           gap: 2,
           borderRadius: 4,
+          textDecoration: 'none',
+          color: 'inherit',
           transition: 'transform 0.15s, box-shadow 0.15s',
           boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
           '&:hover': {
@@ -93,15 +110,12 @@ export default function TaskCard({ task }) {
           }
         }}
       >
-        {/* Task Name */}
         <Typography variant="body1">{task.name}</Typography>
 
-        {/* Date Created */}
         <Typography variant="body2" color="text.secondary">
           {formatDate(task.dateCreated)}
         </Typography>
 
-        {/* Status */}
         <Chip
           label={task.status}
           sx={{
@@ -113,7 +127,6 @@ export default function TaskCard({ task }) {
           }}
         />
 
-        {/* Avatars */}
         <Box sx={{ display: 'flex', alignItems: 'center', pl: 4 }}>
           {ids.slice(0, 2).map((id, idx) => {
             const mem = members[id]
@@ -121,7 +134,7 @@ export default function TaskCard({ task }) {
             return (
               <Tooltip key={id} title="See Employee" arrow>
                 <Avatar
-                  onClick={() => openDetail(id)}
+                  onClick={e => { e.preventDefault(); openDetail(id) }}
                   sx={{
                     width: 32,
                     height: 32,
@@ -141,7 +154,7 @@ export default function TaskCard({ task }) {
           {ids.length > 2 && (
             <Tooltip title="Employee List" arrow>
               <Avatar
-                onClick={() => setListOpen(true)}
+                onClick={e => { e.preventDefault(); setListOpen(true) }}
                 sx={{
                   width: 32,
                   height: 32,
@@ -160,26 +173,37 @@ export default function TaskCard({ task }) {
           )}
         </Box>
 
-        {/* Edit Button */}
-        <Tooltip title="Edit Task" arrow>
-          <IconButton
-            component={Link}
-            to={`/tasks/${task.id}`}
-            size="small"
-            sx={{
-              bgcolor: '#009688',
-              color: 'common.white',
-              width: 32,
-              height: 32,
-              '&:hover': { bgcolor: '#00796b' }
-            }}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        {task.status === 'Completed' && onDelete ? (
+          <Tooltip title="Delete Task" arrow>
+            <IconButton
+              onClick={openConfirm}
+              size="small"
+              sx={{
+                bgcolor: 'error.light',
+                color: 'common.white',
+                width: 32,
+                height: 32,
+                '&:hover': { bgcolor: 'error.main' }
+              }}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Box sx={{ width: 32, height: 32 }} />
+        )}
       </Card>
 
-      {/* Single-Member Detail Dialog */}
+      <Dialog open={confirmOpen} onClose={closeConfirm}>
+        <DialogTitle>
+          {`Are you sure you want to delete task "${task.name}"?`}
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={closeConfirm}>Cancel</Button>
+          <Button color="error" onClick={handleDelete}>Delete</Button>
+        </DialogActions>
+      </Dialog>
+
       <Dialog open={detailOpen} onClose={closeDetail}>
         <DialogTitle sx={{ position: 'relative', pr: 6 }}>
           Employee Details
@@ -193,18 +217,10 @@ export default function TaskCard({ task }) {
         <DialogContent dividers>
           {selectedMember ? (
             <>
-              <Typography>
-                <strong>Member ID:</strong> {selectedMember.id}
-              </Typography>
-              <Typography>
-                <strong>First Name:</strong> {selectedMember.firstName}
-              </Typography>
-              <Typography>
-                <strong>Last Name:</strong> {selectedMember.lastName}
-              </Typography>
-              <Typography>
-                <strong>DOB:</strong> {selectedMember.dob}
-              </Typography>
+              <Typography><strong>ID:</strong> {selectedMember.id}</Typography>
+              <Typography><strong>First:</strong> {selectedMember.firstName}</Typography>
+              <Typography><strong>Last:</strong> {selectedMember.lastName}</Typography>
+              <Typography><strong>DOB:</strong> {selectedMember.dob}</Typography>
             </>
           ) : (
             <Typography>Loading…</Typography>
@@ -212,7 +228,6 @@ export default function TaskCard({ task }) {
         </DialogContent>
       </Dialog>
 
-      {/* Full Employee List Dialog */}
       <Dialog
         open={listOpen}
         onClose={() => setListOpen(false)}
@@ -235,19 +250,10 @@ export default function TaskCard({ task }) {
               if (!mem) return null
               return (
                 <Grid item xs={4} key={id}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center'
-                    }}
-                  >
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Tooltip title="See Employee" arrow>
                       <Avatar
-                        onClick={() => {
-                          openDetail(id)
-                          setListOpen(false)
-                        }}
+                        onClick={e => { e.preventDefault(); openDetail(id); setListOpen(false) }}
                         sx={{
                           width: 48,
                           height: 48,
@@ -259,9 +265,7 @@ export default function TaskCard({ task }) {
                         {mem.firstName.charAt(0)}
                       </Avatar>
                     </Tooltip>
-                    <Typography variant="caption">
-                      {mem.firstName}
-                    </Typography>
+                    <Typography variant="caption">{mem.firstName}</Typography>
                   </Box>
                 </Grid>
               )
