@@ -1,8 +1,7 @@
-import React from 'react'
 import {
   Card,
-  CardHeader,
   CardContent,
+  Box,
   Typography,
   IconButton,
   TextField,
@@ -20,9 +19,58 @@ export default function NameDescriptionCard({
 }) {
   return (
     <Card>
-      <CardHeader
-        title={
-          editing ? (
+      {/* Blue Header */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: '#1976d2',
+          px: 2,
+          py: 0.5
+        }}
+      >
+        <Typography variant="h6" sx={{ color: 'white' }}>
+          Name & Description
+        </Typography>
+        {editing ? (
+          <Tooltip title="Save Changes" arrow>
+            <IconButton
+              onClick={onSave}
+              size="small"
+              sx={{
+                bgcolor: '#3f51b5',
+                color: 'white',
+                '&:hover': { bgcolor: '#303f9f' },
+                borderRadius: '50%',
+                p: 0.5
+              }}
+            >
+              <CheckIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip title="Edit Name/Description" arrow>
+            <IconButton
+              onClick={onEdit}
+              size="small"
+              sx={{
+                bgcolor: '#3f51b5',
+                color: 'white',
+                '&:hover': { bgcolor: '#303f9f' },
+                borderRadius: '50%',
+                p: 0.5
+              }}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
+
+      <CardContent>
+        {editing ? (
+          <>
             <TextField
               label="Task Name"
               name="name"
@@ -30,63 +78,37 @@ export default function NameDescriptionCard({
               onChange={onChange}
               variant="outlined"
               size="small"
-              sx={{ width: '90%' }}
+              fullWidth
+              sx={{ mb: 2 }}
             />
-          ) : (
-            <Typography variant="h6">{form.name}</Typography>
-          )
-        }
-        action={
-          editing ? (
-            <Tooltip title="Save Changes" arrow>
-              <IconButton
-                onClick={onSave}
-                size="small"
-                sx={{
-                  bgcolor: '#009688',
-                  color: 'white',
-                  '&:hover': { bgcolor: '#00796b' },
-                  borderRadius: '50%',
-                  p: 0.5
-                }}
-              >
-                <CheckIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Edit Name/Description" arrow>
-              <IconButton
-                onClick={onEdit}
-                size="small"
-                sx={{
-                  bgcolor: '#009688',
-                  color: 'white',
-                  '&:hover': { bgcolor: '#00796b' },
-                  borderRadius: '50%',
-                  p: 0.5
-                }}
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )
-        }
-      />
-      <CardContent>
-        {editing ? (
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label="Description"
-            name="description"
-            value={form.description}
-            onChange={onChange}
-            variant="outlined"
-            size="small"
-          />
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              label="Description"
+              name="description"
+              value={form.description}
+              onChange={onChange}
+              variant="outlined"
+              size="small"
+            />
+          </>
         ) : (
-          <Typography variant="body1">{form.description}</Typography>
+          <>
+            <Typography variant="caption" color="textSecondary" sx={{ mb: 0.5 }}>
+              Name
+            </Typography>
+            <Typography variant="h6" gutterBottom>
+              {form.name}
+            </Typography>
+
+            <Typography variant="caption" color="textSecondary" sx={{ mb: 0.5 }}>
+              Description
+            </Typography>
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+              {form.description}
+            </Typography>
+          </>
         )}
       </CardContent>
     </Card>

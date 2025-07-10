@@ -34,6 +34,8 @@ export default function EditTask() {
   const [selectedForAdd, setSelectedForAdd] = useState([])
   const [selectedMember,  setSelectedMember]  = useState(null)
 
+  const currentUserId = useSelector(state => state.auth.currentUser?.id)
+
   useEffect(() => {
     dispatch(fetchTaskById(id))
     dispatch(fetchMembers())
@@ -84,8 +86,14 @@ export default function EditTask() {
 
   return (
     <Box sx={{ p:4,  position: 'fixed', inset: 0, background: 'linear-gradient(135deg, #90caf9 0%, #e3f2fd 100%)', minHeight:'100vh' }}>
-      <Typography variant="h5" gutterBottom sx={{ mt: 7, ml: 1 }}>Details for Task ID: {task.id}</Typography>
-      <Box sx={{ display:'flex', gap:2, my:2 }}>
+      <Typography
+        variant="body1"
+        gutterBottom
+        sx={{ mt: 6, ml: 1, fontWeight: 'normal', fontSize: '1rem' }}
+      >
+        Details for Case ID: {task.id}
+      </Typography>
+      <Box sx={{ display:'flex', gap:2 }}>
         <Box sx={{ flex:1, display:'flex', flexDirection:'column', gap:2 }}>
           <NameDescriptionCard
             editing={editingMain}
@@ -117,6 +125,7 @@ export default function EditTask() {
           selectedForAdd={selectedForAdd}
           onAddChange={(_, val) => setSelectedForAdd(val)}
           onAdd={handleAssigneeAdd}
+          currentUserId={currentUserId}
         />
       </Box>
     </Box>

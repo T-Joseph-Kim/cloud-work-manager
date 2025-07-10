@@ -1,7 +1,5 @@
-import React from 'react'
 import {
   Card,
-  CardHeader,
   CardContent,
   Box,
   Typography,
@@ -16,55 +14,100 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import Autocomplete from '@mui/material/Autocomplete'
+import PersonIcon from '@mui/icons-material/Person'
 
 export default function AssigneesCard({
   assignees,
   selectedMember,
   onSelectMember,
   onRemoveMember,
-
-  // match the parent:
   onAddOpen,
   addOpen,
   onAddClose,
   onAdd,
-
   available,
   selectedForAdd,
-  onAddChange
+  onAddChange,
+  currentUserId
 }) {
+  // Move current user to the front of the list
+  const sortedAssignees = [
+    ...assignees.filter(a => a.id === currentUserId),
+    ...assignees.filter(a => a.id !== currentUserId)
+  ]
+
   return (
     <>
       <Card sx={{ flex: 1.5, display: 'flex', flexDirection: 'column' }}>
-        <CardHeader
-          title="Assignees"
-          action={
-            <IconButton onClick={onAddOpen}>
-              <AddIcon />
-              <Typography sx={{ ml: 1 }}>Add New</Typography>
-            </IconButton>
-          }
-        />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: '#1976d2',
+            px: 2,
+          }}
+        >
+          <Typography variant="h6" sx={{ color: 'white' }}>
+            Assignees
+          </Typography>
+          <IconButton onClick={onAddOpen} sx={{ color: 'white' }}>
+            <AddIcon />
+            <Typography sx={{ ml: 0.5, color: 'white' }}>Add New</Typography>
+          </IconButton>
+        </Box>
+
         <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {assignees.map(a => (
-              <Chip
-                key={a.id}
-                label={`${a.firstName} ${a.lastName}`}
-                onClick={() => onSelectMember(a)}
-                onDelete={() => onRemoveMember(a.id)}
-              />
-            ))}
+            {sortedAssignees.map(a => {
+              const isSelected = selectedMember?.id === a.id
+              return (
+                <Chip
+                  key={a.id}
+                  label={`${a.firstName} ${a.lastName}`}
+                  onClick={() => onSelectMember(a)}
+                  onDelete={a.id === currentUserId ? undefined : () => onRemoveMember(a.id)}
+                  deleteIcon={a.id === currentUserId ? null : undefined}
+                  sx={{
+                    backgroundColor: isSelected ? '#1976d2' : '#bbdefb',
+                    color: isSelected ? 'white' : 'black',
+                    '&:hover': {
+                      backgroundColor: isSelected ? '#1565c0' : '#bbdefb',
+                      cursor: 'pointer'
+                    },
+                  }}
+                />
+              )
+            })}
           </Box>
           {selectedMember && (
-            <Box sx={{ mt: 2 }}>
-              <Typography><strong>ID:</strong> {selectedMember.id}</Typography>
-              <Typography>
-                <strong>Name:</strong> {selectedMember.firstName} {selectedMember.lastName}
-              </Typography>
-              <Typography><strong>DOB:</strong> {selectedMember.dob}</Typography>
+            <Box
+              sx={{
+                mt: 4,
+                p: 4,
+                border: '1px solid #ccc',
+                borderRadius: 2,
+                backgroundColor: '#f5faff'
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <PersonIcon sx={{ color: '#1976d2', mr: 1, fontSize: '2rem' }} />
+                <Typography sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
+                  {selectedMember.firstName} {selectedMember.lastName}
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+                <Typography sx={{ fontSize: '1.1rem' }}>
+                  <strong>Employee ID:</strong> {selectedMember.id}
+                </Typography>
+                <Typography sx={{ fontSize: '1.1rem' }}>
+                  <strong>DOB:</strong> {selectedMember.dob}
+                </Typography>
+              </Box>
             </Box>
           )}
+
         </CardContent>
       </Card>
 

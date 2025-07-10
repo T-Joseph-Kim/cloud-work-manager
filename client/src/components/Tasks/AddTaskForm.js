@@ -9,7 +9,8 @@ import {
   IconButton,
   MenuItem,
   Box,
-  Chip
+  Chip,
+  Tooltip
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import Autocomplete from '@mui/material/Autocomplete'
@@ -26,6 +27,7 @@ const statusOptions = [
 export default function AddTaskForm({ open, onClose, onCreate }) {
   const dispatch = useDispatch()
   const members = useSelector(selectAllMembers)
+  const currentUserId = useSelector(state => state.auth.currentUser?.id)
 
   const [form, setForm] = useState({
     name: '',
@@ -35,15 +37,51 @@ export default function AddTaskForm({ open, onClose, onCreate }) {
     assignees: []
   })
 
+  // load members once
   useEffect(() => {
     if (members.length === 0) {
       dispatch(fetchMembers())
     }
   }, [members, dispatch])
 
+  // once members are loaded, initialize assignees with current user
+  useEffect(() => {
+    if (members.length && currentUserId) {
+      const self = members.find(m => m.id === currentUserId)
+      if (self) {
+        setForm(f => ({
+          ...f,
+          assignees: [self]
+        }))
+      }
+    }
+  }, [members, currentUserId])
+
   const handleChange = e => {
     const { name, value } = e.target
     setForm(f => ({ ...f, [name]: value }))
+  }
+
+  const handleAssigneesChange = (_, newVal) => {
+    const self = members.find(m => m.id === currentUserId)
+    const others = newVal.filter(m => m.id !== currentUserId)
+    setForm(f => ({ 
+      ...f, 
+      assignees: self ? [self, ...others] : others 
+    }))
+  }
+
+  const handleCreate = () => {
+    onCreate(form)
+    onClose()
+    const self = members.find(m => m.id === currentUserId)
+    setForm({
+      name: '',
+      description: '',
+      dateCreated: '',
+      status: '',
+      assignees: self ? [self] : []
+    })
   }
 
   return (
@@ -112,13 +150,38 @@ export default function AddTaskForm({ open, onClose, onCreate }) {
           <Autocomplete
             multiple
             options={members}
-            getOptionLabel={opt => opt.firstName + ' ' + opt.lastName}
+            getOptionLabel={opt => `${opt.firstName} ${opt.lastName}`}
             value={form.assignees}
-            onChange={(_, newVal) => setForm(f => ({ ...f, assignees: newVal }))}
+            onChange={handleAssigneesChange}
             renderTags={(value, getTagProps) =>
-              value.map((option, i) => (
-                <Chip key={option.id} label={`${option.firstName} ${option.lastName}`} {...getTagProps({ index: i })} />
-              ))
+              value.map((option, index) => {
+                const isSelf = option.id === currentUserId
+                const tagProps = getTagProps({ index })
+                if (isSelf) {
+                  delete tagProps.onDelete
+                  delete tagProps.key
+                }
+                const chip = (
+                  <Chip
+                    {...tagProps}
+                    key={option.id}
+                    label={`${option.firstName} ${option.lastName}`}
+                    color={isSelf ? 'primary' : 'default'}
+                  />
+                );
+
+                return isSelf ? (
+                  <Tooltip
+                    key={option.id}
+                    title="Task Assigment Required!"
+                    arrow
+                  >
+                    {chip}
+                  </Tooltip>
+                ) : (
+                  chip
+                );
+              })
             }
             renderInput={params => (
               <TextField
@@ -136,12 +199,14 @@ export default function AddTaskForm({ open, onClose, onCreate }) {
         <Button onClick={onClose}>Cancel</Button>
         <Button
           variant="contained"
-          onClick={() => {
-            onCreate(form)
-            onClose()
-            setForm({ name: '', description: '', dateCreated: '', status: '', assignees: [] })
-          }}
-          disabled={!form.name || !form.dateCreated || !form.status || !form.description || form.assignees.length === 0}
+          onClick={handleCreate}
+          disabled={
+            !form.name ||
+            !form.dateCreated ||
+            !form.status ||
+            !form.description ||
+            form.assignees.length === 0
+          }
         >
           Create
         </Button>
