@@ -37,9 +37,10 @@ export default function TaskList() {
   return (
     <Paper elevation={0} sx={{ p: 2, width: '95%', mx:'auto' }}>
       <Typography variant="h4" gutterBottom sx={{ pl:1, mb:2 }}>
-        {firstName ? `${firstName}'s Task Board` : 'Task Board'}
+        {firstName
+          ? `${firstName}${firstName.endsWith('s') ? "'" : "'s"} Task Board`
+          : 'Task Board'}
       </Typography>
-
       <Box
         sx={{
           display: 'grid',

@@ -6,7 +6,7 @@ import axios from 'axios'
 export const fetchMembers = createAsyncThunk(
   'members/fetchMembers',
   async () => {
-    const resp = await axios.get('/api/members')
+    const resp = await axios.get(`${process.env.REACT_APP_API_URL}/api/members`)
     return Object.values(resp.data) // Convert object to array
   }
 )
@@ -15,7 +15,7 @@ export const fetchMembers = createAsyncThunk(
 export const fetchMember = createAsyncThunk(
   'members/fetchMember',
   async (id) => {
-    const resp = await axios.get(`/api/members/${id}`)
+    const resp = await axios.get(`${process.env.REACT_APP_API_URL}/api/members/${id}`)
     return resp.data
   }
 )

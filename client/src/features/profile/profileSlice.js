@@ -5,7 +5,7 @@ import { logout } from '../auth/authSlice'
 export const fetchProfile = createAsyncThunk(
   'profile/fetch',
   async (memberId) => {
-    const resp = await axios.get(`/api/members/${memberId}`)
+    const resp = await axios.get(`${process.env.REACT_APP_API_URL}/api/members/${memberId}`)
     return resp.data    // { id, firstName, lastName, dob }
   }
 )
@@ -25,11 +25,11 @@ const profileSlice = createSlice({
         state.error  = null
       })
       .addCase(fetchProfile.fulfilled, (state, action) => {
-        state.status = 'idle'
+        state.status = 'succeeded'
         state.data   = action.payload
       })
       .addCase(fetchProfile.rejected, (state, action) => {
-        state.status = 'error'
+        state.status = 'failed'
         state.error  = action.error.message
       })
       .addCase(logout, state => {

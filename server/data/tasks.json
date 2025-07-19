@@ -98,10 +98,10 @@
   },
   {
     "id": "9",
-    "name": "Set Up Monitoring and Alerting",
+    "name": "Set Up Monitoring and Alerting EDIT",
     "dateCreated": "2025-06-20",
     "description": "Configure Prometheus dashboards with alerts for service health metrics.",
-    "status": "Completed",
+    "status": "Not Started",
     "owner": "p5tk",
     "employeeIds": [
       "p2dj",
