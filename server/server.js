@@ -5,11 +5,17 @@ const AWS        = require('aws-sdk');
 require('dotenv').config();
 
 // ===== AWS Setup =====
-const s3 = new AWS.S3({ region: 'us-east-2' });
-const dynamo = new AWS.DynamoDB.DocumentClient({ region: 'us-east-2' });
+AWS.config.update({
+  accessKeyId:     process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region:          process.env.AWS_REGION
+});
 
-const BUCKET_NAME = 'work-manager-app-client';
-const TASKS_TABLE = 'Tasks';
+const s3 = new AWS.S3();
+const dynamo = new AWS.DynamoDB.DocumentClient();
+
+const BUCKET_NAME = process.env.S3_BUCKET_NAME;
+const TASKS_TABLE = process.env.DYNAMO_TABLE_NAME;
 
 const app = express();
 app.use(cors());
