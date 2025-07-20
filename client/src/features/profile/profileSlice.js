@@ -4,11 +4,23 @@ import { logout } from '../auth/authSlice'
 
 export const fetchProfile = createAsyncThunk(
   'profile/fetch',
-  async (memberId) => {
-    const resp = await axios.get(`${process.env.REACT_APP_API_URL}/api/members/${memberId}`)
-    return resp.data    // { id, firstName, lastName, dob }
+  async (memberId, thunkAPI) => {
+    try {
+      const resp = await axios.get(`${process.env.REACT_APP_BUCKET_URL}/data/members.json`)
+      const members = resp.data
+      const profile = members[memberId]
+
+      if (!profile) {
+        return thunkAPI.rejectWithValue('Member not found')
+      }
+
+      return profile
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message)
+    }
   }
 )
+
 
 const profileSlice = createSlice({
   name: 'profile',

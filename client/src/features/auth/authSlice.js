@@ -7,19 +7,23 @@ export const login = createAsyncThunk(
   'auth/login',
   async ({ employeeId, password }, thunkAPI) => {
     try {
-      const resp = await axios.post(`${process.env.REACT_APP_API_URL}/api/login`, { id: employeeId, password }) // HTTP POST request to login endpoint
-      const { id } = resp.data
-      // immediately load profile for this user
-      thunkAPI.dispatch(fetchProfile(id))
-      return { id }
-    } catch (err) {
-      if (err.response?.status === 401) {
+      const resp = await axios.get(`${process.env.REACT_APP_BUCKET_URL}/data/users.json`)
+      const users = resp.data
+      const user = users[employeeId]
+
+      if (!user || user.password !== password) {
         return thunkAPI.rejectWithValue('Incorrect employee ID or password')
       }
+
+      // immediately load profile for this user
+      thunkAPI.dispatch(fetchProfile(employeeId))
+      return { id: employeeId }
+    } catch (err) {
       return thunkAPI.rejectWithValue(err.message)
     }
   }
 )
+
 
 // 
 const authSlice = createSlice({
