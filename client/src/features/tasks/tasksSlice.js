@@ -4,26 +4,26 @@ import axios from 'axios'
 // fetch all tasks
 export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
-  async () => (await axios.get(`${process.env.REACT_APP_API_URL}/api/tasks`)).data
+  async () => (await axios.get(`${process.env.REACT_APP_TASKS_API_URL}/tasks`)).data
 )
 
 // fetch a single task
 export const fetchTaskById = createAsyncThunk(
   'tasks/fetchTaskById',
-  async (id) => (await axios.get(`${process.env.REACT_APP_API_URL}/api/tasks/${id}`)).data
+  async (id) => (await axios.get(`${process.env.REACT_APP_TASKS_API_URL}/tasks/${id}`)).data
 )
 
 // update a task
 export const updateTask = createAsyncThunk(
   'tasks/updateTask',
-  async ({ id, changes }) => (await axios.put(`${process.env.REACT_APP_API_URL}/api/tasks/${id}`, changes)).data
+  async ({ id, changes }) => (await axios.put(`${process.env.REACT_APP_TASKS_API_URL}/tasks/${id}`, changes)).data
 )
 
 // delete a task
 export const deleteTask = createAsyncThunk(
   'tasks/deleteTask',
   async (id) => {
-    await axios.delete(`${process.env.REACT_APP_API_URL}/api/tasks/${id}`)
+    await axios.delete(`${process.env.REACT_APP_TASKS_API_URL}/tasks/${id}`)
     return id
   }
 )
@@ -31,7 +31,7 @@ export const deleteTask = createAsyncThunk(
 // create a new task
 export const createTask = createAsyncThunk(
   'tasks/createTask',
-  async (task) => (await axios.post(`${process.env.REACT_APP_API_URL}/api/tasks`, task)).data
+  async (task) => (await axios.post(`${process.env.REACT_APP_TASKS_API_URL}/tasks`, task)).data
 )
 
 const tasksSlice = createSlice({
