@@ -125,7 +125,7 @@ Your tasks API should support the following endpoints:
 1. Click on your profile icon in the header
 2. View and update your profile information
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 client/
